@@ -7,7 +7,7 @@ import model.objectdata.ShapeType;
 import model.rasterdata.Raster;
 
 public class LineRasterizerBresenham extends ShapeRasterizer {
-    public LineRasterizerBresenham(Filler filler, Point2D start, Point2D end) {
+    public LineRasterizerBresenham(LineFiller filler, Point2D start, Point2D end) {
         super(filler, start, end);
     }
     public LineRasterizerBresenham() {

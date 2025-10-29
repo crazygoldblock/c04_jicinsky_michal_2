@@ -8,12 +8,15 @@ import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 
 import model.objectdata.Point2D;
-import model.rasterops.Filler;
+import model.rasterops.LineFiller;
 import model.rasterops.LineRasterizerBresenham;
 import model.rasterops.PolygonRasterizer;
+import model.rasterops.ShapeFiller;
 import model.rasterops.ShapeRasterizer;
 import model.rasterops.SolidFiller;
+import model.rasterops.SolidShapeFiller;
 import model.rasterops.DashedFiller;
+import model.rasterops.FloodFill;
 import model.rasterops.TransitionFiller;
 import view.Panel;
 
@@ -25,6 +28,7 @@ public class Controller2D implements Controller {
     private Point2D end;
     private boolean shift = false;
     private boolean control = false;
+    private boolean fill = false;
 
     private int primaryColorIndex = 6;
     private Color primaryColor = Color.ORANGE;
@@ -39,10 +43,11 @@ public class Controller2D implements Controller {
     private PolygonRasterizer polygon = new PolygonRasterizer();
 
     private int fillerIndex = 2;
-    private Filler filler = new SolidFiller(primaryColor);
+    private LineFiller filler = new SolidFiller(primaryColor);
 
     private ArrayList<ShapeRasterizer> shapes = new ArrayList<>();
 
+    
     public Controller2D(Panel panel) {
         this.panel = panel;
 
@@ -181,6 +186,15 @@ public class Controller2D implements Controller {
             }
             @Override
             public void keyReleased(KeyEvent e) {
+                // f - fill
+                if (e.getKeyCode() == 70) {
+                    fill = !fill;
+
+                    ShapeFiller shapeFiller = new SolidShapeFiller(); 
+                    shapeFiller.setColors(primaryColor, secondaryColor);
+                    FloodFill f = new FloodFill(panel.getRaster(), shapeFiller);
+                    f.fill(new Point2D(300, 300));
+                } 
                 // enter - dokončení polygonu
                 if (e.getKeyCode() == 10) {
                     shapes.add(polygon);
@@ -257,6 +271,9 @@ public class Controller2D implements Controller {
                 }
             }
             public void mouseDragged(MouseEvent e) {
+
+               
+
                 // pokud je start null = tohle je začátek vytváření pového útvaru
                 if (start == null) {
                     // pokud kreslíme polygon start musí být konec poslední úsečky

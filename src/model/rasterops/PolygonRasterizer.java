@@ -8,7 +8,7 @@ import model.rasterdata.Raster;
 
 public class PolygonRasterizer extends ShapeRasterizer {
 
-    public PolygonRasterizer(Filler filler, Point2D start, Point2D end) {
+    public PolygonRasterizer(LineFiller filler, Point2D start, Point2D end) {
         super(filler, start, end);
     }
     public PolygonRasterizer() {

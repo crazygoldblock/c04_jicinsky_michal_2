@@ -6,11 +6,11 @@ import model.rasterdata.Raster;
 
 public abstract class ShapeRasterizer {
 
-    protected Filler filler;
+    protected LineFiller filler;
     protected Point2D start;
     protected Point2D end;
 
-    public ShapeRasterizer(Filler filler, Point2D start, Point2D end) {
+    public ShapeRasterizer(LineFiller filler, Point2D start, Point2D end) {
         this.filler = filler;
 
         this.start = start;
@@ -20,7 +20,7 @@ public abstract class ShapeRasterizer {
         this.start = start;
         this.end = end;
     }
-    public void setFiller(Filler filler) {
+    public void setFiller(LineFiller filler) {
         this.filler = filler;
     }
 

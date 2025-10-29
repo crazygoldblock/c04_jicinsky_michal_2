@@ -5,7 +5,7 @@ import java.awt.Color;
 import model.objectdata.Point2D;
 import model.rasterdata.Raster;
 
-public class SolidFiller implements Filler {
+public class SolidFiller implements LineFiller {
 
     private Color color;
 

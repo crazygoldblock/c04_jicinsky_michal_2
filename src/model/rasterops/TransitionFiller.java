@@ -8,7 +8,7 @@ import model.rasterdata.Raster;
 /*
  * vykreslení přechodu barev úsečky pomocí lineární interpolace
  */
-public class TransitionFiller implements Filler {
+public class TransitionFiller implements LineFiller {
     private Color cStart;
     private Color cEnd;
 

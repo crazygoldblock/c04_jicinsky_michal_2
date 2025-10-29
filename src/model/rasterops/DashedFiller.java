@@ -8,7 +8,7 @@ import model.rasterdata.Raster;
 /*
  * vykreslení přerušované čáry
  */
-public class DashedFiller implements Filler {
+public class DashedFiller implements LineFiller {
     private Color color;
 
     public DashedFiller(Color color) {

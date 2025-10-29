@@ -8,7 +8,7 @@ import model.rasterdata.RasterBI;
 import java.awt.*;
 
 public class LineRasterizerGraphics extends ShapeRasterizer {
-    public LineRasterizerGraphics(Filler filler, Point2D start, Point2D end) {
+    public LineRasterizerGraphics(LineFiller filler, Point2D start, Point2D end) {
         super(filler, start, end);
     }
     @Override
