@@ -29,6 +29,7 @@ public class Controller2D implements Controller {
     private boolean shift = false;
     private boolean control = false;
     private boolean fill = false;
+    private boolean lastFill = true;
 
     private int primaryColorIndex = 6;
     private Color primaryColor = Color.ORANGE;
@@ -186,15 +187,7 @@ public class Controller2D implements Controller {
             }
             @Override
             public void keyReleased(KeyEvent e) {
-                // f - fill
-                if (e.getKeyCode() == 70) {
-                    fill = !fill;
-
-                    ShapeFiller shapeFiller = new SolidShapeFiller(); 
-                    shapeFiller.setColors(primaryColor, secondaryColor);
-                    FloodFill f = new FloodFill(panel.getRaster(), shapeFiller);
-                    f.fill(new Point2D(300, 300));
-                } 
+                
                 // enter - dokončení polygonu
                 if (e.getKeyCode() == 10) {
                     shapes.add(polygon);
@@ -239,12 +232,19 @@ public class Controller2D implements Controller {
                     if (control && shapes.size() > 0) 
                         shapes.remove(shapes.size() - 1);
                 }
+                // f - fill
+                if (e.getKeyCode() == 70) {
+                    fill = !fill;
+                } 
                 reDraw();
             }
         });
         panel.addMouseMotionListener(new MouseAdapter() {
             @Override
             public void mouseMoved(MouseEvent e) {
+
+                lastFill = false;
+
                 // pokud start není null tak tohle první zavolání této funkkce po dokončení vytváření úsečky
                 if (start != null) {
                     end = new Point2D(e.getX(), e.getY());
@@ -272,7 +272,15 @@ public class Controller2D implements Controller {
             }
             public void mouseDragged(MouseEvent e) {
 
-               
+                if (fill && !lastFill) {
+                    ShapeFiller shapeFiller = new SolidShapeFiller(); 
+                    shapeFiller.setColors(primaryColor, secondaryColor);
+                    FloodFill f = new FloodFill(shapeFiller, new Point2D(e.getX(), e.getY()));
+                    shapes.add(f);
+                    reDraw();
+                    lastFill = true;
+                    return;
+                }
 
                 // pokud je start null = tohle je začátek vytváření pového útvaru
                 if (start == null) {

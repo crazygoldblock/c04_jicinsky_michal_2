@@ -1,22 +1,27 @@
 package model.rasterops;
 
-import java.awt.Color;
 import java.util.ArrayList;
 
 import model.objectdata.Point2D;
+import model.objectdata.ShapeType;
 import model.rasterdata.Raster;
 
-public class FloodFill {
+public class FloodFill extends ShapeRasterizer {
 
-    private Raster raster;
     private ShapeFiller filler;
+    private Point2D point;
 
-    public FloodFill(Raster raster, ShapeFiller filler) {
-        this.raster = raster;
+    public FloodFill(ShapeFiller filler, Point2D point) {
+        super(null, null, null);
         this.filler = filler;
+        this.point = point;
     }
-
-    public void fill(Point2D point) {
+    @Override
+    public ShapeType getShapeType() {
+        return ShapeType.Fill;
+    }
+    @Override
+    public void draw(Raster raster) {
         int start = raster.getPixel(point.x, point.y);
 
         ArrayList<Point2D> list = new ArrayList<>();
@@ -32,9 +37,8 @@ public class FloodFill {
                 continue;
 
             if (raster.getPixel(x, y) == start) {
-                 System.out.println("he");
-                //raster.setPixel(x, y, filler.getColor(new Point2D(x, y), raster).getRGB());
-                raster.setPixel(x, y, Color.RED.getRGB());
+                raster.setPixel(x, y, filler.getColor(new Point2D(x, y), raster).getRGB());
+                //raster.setPixel(x, y, Color.RED.getRGB());
 
                 list.add(new Point2D(x + 1, y));
                 list.add(new Point2D(x - 1, y));
