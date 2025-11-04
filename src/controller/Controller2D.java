@@ -16,7 +16,9 @@ import model.rasterops.ShapeRasterizer;
 import model.rasterops.SolidFiller;
 import model.rasterops.SolidShapeFiller;
 import model.rasterops.DashedFiller;
+import model.rasterops.DashedShapeFiller;
 import model.rasterops.FloodFill;
+import model.rasterops.InvertedShapeFiller;
 import model.rasterops.TransitionFiller;
 import view.Panel;
 
@@ -45,6 +47,9 @@ public class Controller2D implements Controller {
 
     private int fillerIndex = 2;
     private LineFiller filler = new SolidFiller(primaryColor);
+
+    private int shapeFillerIndex = 1;
+    private ShapeFiller shapeFiller = new SolidShapeFiller();
 
     private ArrayList<ShapeRasterizer> shapes = new ArrayList<>();
 
@@ -133,6 +138,28 @@ public class Controller2D implements Controller {
         }
         return (index + 1) % len;
     }
+    private int switchShapeFiller(int index) {
+
+        int len = 3;
+
+        if (index < 0) 
+            index += len;
+
+        switch (index) {
+            case 0:
+                shapeFiller = new SolidShapeFiller();
+                break;
+            case 1:
+                shapeFiller = new DashedShapeFiller();
+                break;
+            case 2:
+                shapeFiller = new InvertedShapeFiller();
+                break;
+            default:
+                throw new RuntimeException("shape filler");
+        }
+        return (index + 1) % len;
+    }
     private int switchShapeType(int index) {
 
         int len = 2;
@@ -187,7 +214,7 @@ public class Controller2D implements Controller {
             }
             @Override
             public void keyReleased(KeyEvent e) {
-                
+                System.out.println(e.getKeyCode());
                 // enter - dokončení polygonu
                 if (e.getKeyCode() == 10) {
                     shapes.add(polygon);
@@ -236,6 +263,10 @@ public class Controller2D implements Controller {
                 if (e.getKeyCode() == 70) {
                     fill = !fill;
                 } 
+                // L - switch shape filler
+                if (e.getKeyCode() == 76) {
+                    shapeFillerIndex  = switchShapeFiller(shapeFillerIndex);
+                } 
                 reDraw();
             }
         });
@@ -272,13 +303,13 @@ public class Controller2D implements Controller {
             }
             public void mouseDragged(MouseEvent e) {
 
-                if (fill && !lastFill) {
-                    ShapeFiller shapeFiller = new SolidShapeFiller(); 
+                if (fill && !lastFill) { 
                     shapeFiller.setColors(primaryColor, secondaryColor);
                     FloodFill f = new FloodFill(shapeFiller, new Point2D(e.getX(), e.getY()));
                     shapes.add(f);
                     reDraw();
                     lastFill = true;
+                    switchShapeFiller(shapeFillerIndex - 1);
                     return;
                 }
 
