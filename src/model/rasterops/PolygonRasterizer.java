@@ -14,6 +14,10 @@ public class PolygonRasterizer extends ShapeRasterizer {
     public PolygonRasterizer() {
         super(null, null, null);
     }
+    public PolygonRasterizer(ArrayList<Point2D> points) {
+        super(null, null, null);
+        this.points = points;
+    }
     @Override
     public ShapeType getShapeType() {
         return ShapeType.Mnohouhelnik;
@@ -58,5 +62,7 @@ public class PolygonRasterizer extends ShapeRasterizer {
         line.setPoints(p1, p2);
         line.draw(raster);
     }
-
+    public ArrayList<Point2D> getPoints() {
+        return points;
+    }
 }

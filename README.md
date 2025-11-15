@@ -19,3 +19,9 @@ Shift - zarovnání úsečky
 Ctrl+Z - smazání posledního útvaru 
 
 Enter - dokončení polygonu 
+
+F - vypnutí/zapnutí režimu vyplňování
+
+S - vyplnění posledního vytvořeného polygonu
+
+Q - ořezání předposledního polygonu posledním polygonem

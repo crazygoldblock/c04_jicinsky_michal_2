@@ -10,12 +10,15 @@ import javax.swing.*;
  * Šipka doprava - změna sekundární barvy 
  *
  * Šipka nahoru - změna stylu vykreslení útvaru 
- * Šipka dolů - změna útvaru 
+ * Šipka dolů - změna útvaru (úsečka, mnohoúhelník, obdélník) 
 
  * C - smazání všech útvarů 
  * Shift - zarovnání úsečky 
  * Ctrl+Z - smazání posledního útvaru 
  * Enter - dokončení polygonu 
+ * F - vypnutí/zapnutí režimu vyplňování
+ * S - vyplnění posledního vytvořeného polygonu
+ * Q - ořezání předposledního polygonu posledním polygonem
  */
 
 public class App {
