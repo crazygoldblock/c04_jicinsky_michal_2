@@ -1,4 +1,4 @@
-# Úloha 1 - Rasterizace úsečky, čáry s barevným přechodem a n-úhelníku 
+# Úloha2 - Vyplnění a ořezání oblasti
 
 Michal Jičínský
 
