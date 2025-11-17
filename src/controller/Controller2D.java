@@ -33,7 +33,7 @@ public class Controller2D implements Controller {
     private boolean lastRect = false;
 
     private Color primaryColor = Color.MAGENTA;
-    private Color secondaryColor = Color.BLACK;
+    private Color secondaryColor = Color.GREEN;
 
     private int shapeTypeIndex = 0;
 

@@ -48,7 +48,7 @@ public class Suther {
         return (B.x - A.x) * (P.y - A.y) - (B.y - A.y) * (P.x - A.x);
     }
     private static Point2D intersection(Point2D S, Point2D P, Point2D A, Point2D B) {
-         double dx1 = P.x - S.x;
+        double dx1 = P.x - S.x;
         double dy1 = P.y - S.y;
         double dx2 = B.x - A.x;
         double dy2 = B.y - A.y;
