@@ -5,13 +5,19 @@ import java.awt.Color;
 import model.objectdata.Point2D;
 import model.objectdata.ShapeType;
 import model.rasterdata.Raster;
+import model.rasterops.Filler.FillerType;
 
 public class LineRasterizerBresenham extends ShapeRasterizer {
-    public LineRasterizerBresenham(LineFiller filler, Point2D start, Point2D end) {
-        super(filler, start, end);
-    }
-    public LineRasterizerBresenham() {
-        super(null, null, null);
+
+    private Point2D start;
+    private Point2D end;
+
+    public LineRasterizerBresenham(Point2D start, Point2D end, Color primary, Color secondary, FillerType type) {
+        this.start = start;
+        this.end = end;
+        primaryColor = primary.getRGB();
+        secondaryColor = secondary.getRed();
+        fillerType = type;
     }
     @Override
     public ShapeType getShapeType() {
@@ -19,9 +25,6 @@ public class LineRasterizerBresenham extends ShapeRasterizer {
     }
     @Override
     public void draw(Raster raster) {
-
-        // použit Bresenhamův algoritmus
-
         int count = 0;
 
         int x1 = start.x;
@@ -52,7 +55,7 @@ public class LineRasterizerBresenham extends ShapeRasterizer {
             else
                 t = (float)(y1 - start.y) / (end.y - start.y);
 
-            Color color = filler.getColor(t, count++, new Point2D(x1, y1), raster);
+            Color color = Filler.getColor(fillerType, new Point2D(x1, y1), raster, count++, new Color(primaryColor), new Color(secondaryColor), t);
             raster.setPixel(x1, y1, color.getRGB());
             
             if (x1 == x2 && y1 == y2)

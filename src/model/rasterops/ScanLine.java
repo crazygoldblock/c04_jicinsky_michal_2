@@ -7,29 +7,33 @@ import model.objectdata.Point2D;
 import model.objectdata.Polygon;
 import model.objectdata.ShapeType;
 import model.rasterdata.Raster;
+import model.rasterops.Filler.FillerType;
 
 public class ScanLine extends ShapeRasterizer {
 
     private ArrayList<Point2D> points;
-    private ShapeFiller shapeFiller;
 
-    public ScanLine(LineFiller filler, Point2D start, Point2D end) {
-        super(filler, start, end);
-    }
-    public ScanLine(ArrayList<Point2D> points, ShapeFiller filler) {
-        super(null, null, null);
+    public ScanLine(ArrayList<Point2D> points, FillerType type, Color primary, Color secondary) {
         this.points = points;
-        shapeFiller = filler;
+        primaryColor = primary.getRGB();
+        secondaryColor = secondary.getRGB();
+        fillerType = type;
     }
 
     public void fillPolygonScanline(Raster raster, Polygon polygon) {
         
         int minY = Integer.MAX_VALUE;
         int maxY = Integer.MIN_VALUE;
+        int minX = Integer.MAX_VALUE;
+        int maxX = Integer.MIN_VALUE;
+
+        int count = 0;
 
         for (Point2D p : polygon.getPoints()) {
             minY = Math.min(minY, p.y);
             maxY = Math.max(maxY, p.y);
+            minX = Math.min(minX, p.x);
+            maxX = Math.max(maxX, p.x);
         }
 
         for (int scanY = minY; scanY <= maxY; scanY++) {
@@ -56,7 +60,12 @@ public class ScanLine extends ShapeRasterizer {
                 int xEnd = intersections.get(i + 1);
 
                 for (int x = xStart; x < xEnd; x++) {
-                    Color color = shapeFiller.getColor(new Point2D(x, scanY), raster);
+
+                    float t1 = (maxX - minX) / (x - minX);
+                    float t2 = (maxY - minY) / (scanY - minY);
+                    float t = (t1 + t2) / 2;
+
+                    Color color = Filler.getColor(fillerType, new Point2D(x, scanY), raster, count++, new Color(primaryColor), new Color(secondaryColor), t);
                     raster.setPixel(x, scanY, color.getRGB());
                 }
             }

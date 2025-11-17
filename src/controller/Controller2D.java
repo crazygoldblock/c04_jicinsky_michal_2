@@ -10,19 +10,13 @@ import java.util.ArrayList;
 import model.objectdata.Point2D;
 import model.objectdata.Polygon;
 import model.objectdata.ShapeType;
-import model.rasterops.LineFiller;
 import model.rasterops.LineRasterizerBresenham;
 import model.rasterops.PolygonRasterizer;
 import model.rasterops.ScanLine;
-import model.rasterops.ShapeFiller;
 import model.rasterops.ShapeRasterizer;
-import model.rasterops.SolidFiller;
-import model.rasterops.SolidShapeFiller;
 import model.rasterops.Suther;
-import model.rasterops.DashedFiller;
-import model.rasterops.DashedShapeFiller;
+import model.rasterops.Filler.FillerType;
 import model.rasterops.FloodFill;
-import model.rasterops.TransitionFiller;
 import view.Panel;
 
 public class Controller2D implements Controller {
@@ -44,17 +38,15 @@ public class Controller2D implements Controller {
     private Color secondaryColor = Color.GREEN;
 
     private int shapeTypeIndex = 0;
-    
-    private LineRasterizerBresenham line = new LineRasterizerBresenham();
 
-    private PolygonRasterizer polygon = new PolygonRasterizer();
+    private ArrayList<Point2D> polygon = new ArrayList<>();
 
-    private int fillerIndex = 2;
-    private LineFiller filler = new SolidFiller(primaryColor);
+    private int fillerIndex = 0;
+    private FillerType fillerType = FillerType.Solid;
 
     private ArrayList<ShapeRasterizer> shapes = new ArrayList<>();
 
-    private PolygonRasterizer rectangle;
+    private ArrayList<Point2D> rectangle;
 
     
     public Controller2D(Panel panel) {
@@ -93,8 +85,7 @@ public class Controller2D implements Controller {
 
         Polygon cut = Suther.clipPolygon(new Polygon(p1.getPoints()), new Polygon(p2.getPoints()));
 
-        PolygonRasterizer novy = new PolygonRasterizer(cut.getPoints());
-        novy.setFiller(filler);
+        PolygonRasterizer novy = new PolygonRasterizer(cut.getPoints(), primaryColor, secondaryColor, fillerType);
         
         switchFiller(fillerIndex - 1);
 
@@ -132,45 +123,40 @@ public class Controller2D implements Controller {
             shape.draw(panel.getRaster());
         }
 
-        filler.setColors(primaryColor, secondaryColor);
-
         // vykreslení úsečky která se právě vytváří
         if (start != null) {
             Point2D newEnd = EditEndOnShift(start, end, shift, true);
-            
-            line.setPoints(start, newEnd);
-            line.setFiller(filler);
-
-            line.draw(panel.getRaster());
+            new LineRasterizerBresenham(start, newEnd, primaryColor, secondaryColor, fillerType).draw(panel.getRaster());
         }
 
         if (rectangle != null ) {
-            rectangle.setFiller(filler);
-            rectangle.draw(panel.getRaster());
+            new PolygonRasterizer(rectangle, primaryColor, secondaryColor, fillerType).draw(panel.getRaster());
         }
 
         // vykreslení polygonu který se právě vytváří
-        polygon.setFiller(filler);
-        polygon.draw(panel.getRaster());
+        new PolygonRasterizer(polygon, primaryColor, secondaryColor, fillerType).draw(panel.getRaster());
 
         panel.repaint();
     }
     private int switchFiller(int index) {
 
-        int len = 3;
+        int len = 4;
 
         if (index < 0) 
             index += len;
 
         switch (index) {
             case 0:
-                filler = new TransitionFiller();
+                fillerType = FillerType.Dashed;
                 break;
             case 1:
-                filler = new SolidFiller();
+                fillerType = FillerType.Transition;
                 break;
             case 2:
-                filler = new DashedFiller();
+                fillerType = FillerType.Inverted;
+                break;
+            case 3:
+                fillerType = FillerType.Solid;
                 break;
             default:
                 throw new RuntimeException("barva");
@@ -233,11 +219,10 @@ public class Controller2D implements Controller {
             }
             @Override
             public void keyReleased(KeyEvent e) {
-                System.out.println(e.getKeyCode());
                 // enter - dokončení polygonu
                 if (e.getKeyCode() == 10) {
-                    shapes.add(polygon);
-                    polygon = new PolygonRasterizer();
+                    shapes.add(new PolygonRasterizer(polygon, primaryColor, secondaryColor, fillerType));
+                    polygon = new ArrayList<>();
                     switchFiller(fillerIndex - 1);
                 } 
                 // shift
@@ -260,9 +245,9 @@ public class Controller2D implements Controller {
                 }
                 // dolů šipka - změna útvaru
                 if (e.getKeyCode() == 40) {
-                    if (polygon.Size() > 0) {
-                        shapes.add(polygon);
-                        polygon = new PolygonRasterizer();
+                    if (polygon.size() > 0) {
+                        shapes.add(new PolygonRasterizer(polygon, primaryColor, secondaryColor, fillerType));
+                        polygon = new ArrayList<>();
                     }
                     if (rectangle != null) {
                         rectangle = null;
@@ -289,10 +274,8 @@ public class Controller2D implements Controller {
                 // s - vyplnění posledního polygonu 
                 if (e.getKeyCode() == 83) {
                     if (shapes.size() != 0 && shapes.get(shapes.size() - 1).getShapeType() == ShapeType.Mnohouhelnik) {
-                        PolygonRasterizer pr = (PolygonRasterizer)shapes.get(shapes.size() - 1);
-                        ShapeFiller sf = new DashedShapeFiller();
-                        sf.setColors(primaryColor, secondaryColor); 
-                        shapes.add(new ScanLine(pr.getPoints(), sf));
+                        PolygonRasterizer pr = (PolygonRasterizer)shapes.get(shapes.size() - 1); 
+                        shapes.add(new ScanLine(pr.getPoints(), fillerType, primaryColor, secondaryColor));
                     }
                 } 
                 // q - ořezání polygonu
@@ -305,23 +288,21 @@ public class Controller2D implements Controller {
         panel.addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
-                if (fill && !lastFill) {
-                    ShapeFiller shapeFiller = new SolidShapeFiller(); 
-                    shapeFiller.setColors(primaryColor, secondaryColor);
-                    FloodFill f = new FloodFill(shapeFiller, new Point2D(e.getX(), e.getY()));
+                if (fill && !lastFill) { 
+                    FloodFill f = new FloodFill(new Point2D(e.getX(), e.getY()), primaryColor, secondaryColor, fillerType);
                     shapes.add(f);
                     reDraw();
                     lastFill = true;
                     return;
                 }
-                if (shapeTypeIndex == 2 && rectangle != null && rectangle.Size() == 2) {
-                    int sx = rectangle.getPoints().get(1).x;
-                    rectangle.setPoints(null, new Point2D(sx, e.getY()));
+                if (shapeTypeIndex == 2 && rectangle != null && rectangle.size() == 2) {
+                    int sx = rectangle.get(1).x;
+                    rectangle.add(new Point2D(sx, e.getY()));
 
-                    int sx2 = rectangle.getPoints().get(0).x;
-                    rectangle.setPoints(null, new Point2D(sx2, e.getY()));
+                    int sx2 = rectangle.get(0).x;
+                    rectangle.add(new Point2D(sx2, e.getY()));
 
-                    shapes.add(rectangle);
+                    shapes.add(new PolygonRasterizer(rectangle, primaryColor, secondaryColor, fillerType));
                     rectangle = null;
                     reDraw();
                     lastRect = true;
@@ -339,8 +320,6 @@ public class Controller2D implements Controller {
                 // pokud start není null tak tohle první zavolání této funkkce po dokončení vytváření úsečky
                 if (start != null) {
 
-                    System.out.println(e.getX() + ", " + e.getY());
-
                     if (shapeTypeIndex != 2) {
                         end = new Point2D(e.getX(), e.getY());
                     }
@@ -350,26 +329,23 @@ public class Controller2D implements Controller {
 
                     // pokud kreslíme úsečku - přidat do listu
                     if (shapeTypeIndex == 0) {
-                        shapes.add(line);
-                        line = new LineRasterizerBresenham();
+                        shapes.add(new LineRasterizerBresenham(start, end, primaryColor, secondaryColor, fillerType));
                     }
                     else if (shapeTypeIndex == 2) {
-                        rectangle = new PolygonRasterizer();
-                        rectangle.setPoints(start, end);
+                        rectangle = new ArrayList<>();
+                        rectangle.add(start);
+                        rectangle.add(end);
                     }
                     // pokud kreslíme polygon - přidat další bod
                     else {
                         end = EditEndOnShift(start, end, shift, true);
-                        polygon.setPoints(start, end);
+                        if (polygon.size() == 0)
+                            polygon.add(start);
+
+                        polygon.add(end);
                     }
 
-                    switchShapeType(shapeTypeIndex - 1);
-                    primaryColor = new Color(primaryColor.getRGB());
-                    secondaryColor = new Color(secondaryColor.getRGB());
-                    switchFiller(fillerIndex - 1);
-
                     start = null;              
-                    
                     reDraw();
                 }
             }
@@ -385,7 +361,7 @@ public class Controller2D implements Controller {
                 // pokud je start null = tohle je začátek vytváření pového útvaru
                 if (start == null) {
                     // pokud kreslíme polygon start musí být konec poslední úsečky
-                    if (shapeTypeIndex == 0 || shapeTypeIndex == 2 || polygon.Size() == 0) {
+                    if (shapeTypeIndex == 0 || shapeTypeIndex == 2 || polygon.size() == 0) {
                         start = new Point2D(e.getX(), e.getY());
                     }
                     else {
