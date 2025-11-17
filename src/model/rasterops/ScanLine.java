@@ -61,10 +61,10 @@ public class ScanLine extends ShapeRasterizer {
 
                 for (int x = xStart; x < xEnd; x++) {
 
-                    float t1 = (maxX - minX) / (x - minX);
-                    float t2 = (maxY - minY) / (scanY - minY);
+                    float t1 = (float)(x - minX) / (float)(maxX - minX);
+                    float t2 = (float)(scanY - minY) / (float)(maxY - minY);
                     float t = (t1 + t2) / 2;
-
+                    
                     Color color = Filler.getColor(fillerType, new Point2D(x, scanY), raster, count++, new Color(primaryColor), new Color(secondaryColor), t);
                     raster.setPixel(x, scanY, color.getRGB());
                 }

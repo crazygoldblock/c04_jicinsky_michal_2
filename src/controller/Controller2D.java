@@ -25,29 +25,24 @@ public class Controller2D implements Controller {
 
     private Point2D start;
     private Point2D end;
+
     private boolean shift = false;
     private boolean control = false;
     private boolean fill = false;
     private boolean lastFill = true;
     private boolean lastRect = false;
 
-    private int primaryColorIndex = 6;
-    private Color primaryColor = Color.ORANGE;
-
-    private int secondaryColorIndex = 2;
-    private Color secondaryColor = Color.GREEN;
+    private Color primaryColor = Color.MAGENTA;
+    private Color secondaryColor = Color.BLACK;
 
     private int shapeTypeIndex = 0;
 
-    private ArrayList<Point2D> polygon = new ArrayList<>();
-
-    private int fillerIndex = 0;
     private FillerType fillerType = FillerType.Solid;
 
-    private ArrayList<ShapeRasterizer> shapes = new ArrayList<>();
-
     private ArrayList<Point2D> rectangle;
+    private ArrayList<Point2D> polygon = new ArrayList<>();
 
+    private ArrayList<ShapeRasterizer> shapes = new ArrayList<>();
     
     public Controller2D(Panel panel) {
         this.panel = panel;
@@ -86,8 +81,6 @@ public class Controller2D implements Controller {
         Polygon cut = Suther.clipPolygon(new Polygon(p1.getPoints()), new Polygon(p2.getPoints()));
 
         PolygonRasterizer novy = new PolygonRasterizer(cut.getPoints(), primaryColor, secondaryColor, fillerType);
-        
-        switchFiller(fillerIndex - 1);
 
         shapes.add(novy);
     }
@@ -138,30 +131,24 @@ public class Controller2D implements Controller {
 
         panel.repaint();
     }
-    private int switchFiller(int index) {
+    private void switchFiller(FillerType type) {
 
-        int len = 4;
-
-        if (index < 0) 
-            index += len;
-
-        switch (index) {
-            case 0:
+        switch (type) {
+            case Solid:
                 fillerType = FillerType.Dashed;
                 break;
-            case 1:
+            case Dashed:
                 fillerType = FillerType.Transition;
                 break;
-            case 2:
+            case Transition:
                 fillerType = FillerType.Inverted;
                 break;
-            case 3:
+            case Inverted:
                 fillerType = FillerType.Solid;
                 break;
             default:
-                throw new RuntimeException("barva");
+                throw new RuntimeException("filler type");
         }
-        return (index + 1) % len;
     }
     private int switchShapeType(int index) {
 
@@ -182,25 +169,24 @@ public class Controller2D implements Controller {
         }
         return (index + 1) % len;
     }
-    private Color switchColor(int index) {
-        switch (index) {
-            case 0:
-                return Color.BLACK;
-            case 1:
-                return Color.GREEN;
-            case 2:
-                return Color.RED;
-            case 3:
-                return Color.YELLOW;
-            case 4:
-                return Color.BLUE;
-            case 5:
-                return Color.ORANGE;
-            case 6:
-                return Color.CYAN;
-            case 7:
-                return Color.MAGENTA;
-        }
+    private Color switchColor(Color color) {
+        if (color == Color.MAGENTA) 
+            return Color.BLACK;
+        else if (color == Color.BLACK)
+            return Color.GREEN;
+        else if (color == Color.GREEN)
+            return Color.RED;
+        else if (color == Color.RED)
+            return Color.YELLOW;
+        else if (color == Color.YELLOW)
+            return Color.BLUE;
+        else if (color == Color.BLUE)
+            return Color.ORANGE;
+        else if (color == Color.ORANGE)
+            return Color.CYAN;
+        else if (color == Color.CYAN)
+            return Color.MAGENTA;
+    
         throw new RuntimeException("barva");
     }
     @Override
@@ -223,7 +209,6 @@ public class Controller2D implements Controller {
                 if (e.getKeyCode() == 10) {
                     shapes.add(new PolygonRasterizer(polygon, primaryColor, secondaryColor, fillerType));
                     polygon = new ArrayList<>();
-                    switchFiller(fillerIndex - 1);
                 } 
                 // shift
                 if (e.getKeyCode() == 16) {
@@ -235,13 +220,11 @@ public class Controller2D implements Controller {
                 } 
                 // levá šipka - změna primární barvy
                 if (e.getKeyCode() == 37) {
-                    primaryColor = switchColor(primaryColorIndex++);
-                    primaryColorIndex = primaryColorIndex % 8;
+                    primaryColor = switchColor(primaryColor);
                 }
                 // pravá šipka - změna sekundární barvy
                 if (e.getKeyCode() == 39) {
-                    secondaryColor = switchColor(secondaryColorIndex++);
-                    secondaryColorIndex = secondaryColorIndex % 8;
+                    secondaryColor = switchColor(secondaryColor);
                 }
                 // dolů šipka - změna útvaru
                 if (e.getKeyCode() == 40) {
@@ -256,7 +239,7 @@ public class Controller2D implements Controller {
                 }
                 // nahoru šipka - změna stylu vykreslení
                 if (e.getKeyCode() == 38) {
-                    fillerIndex = switchFiller(fillerIndex);
+                    switchFiller(fillerType);
                 }
                 // C - smazání plátna
                 if (e.getKeyCode() == 67) {

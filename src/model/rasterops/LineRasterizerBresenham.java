@@ -13,10 +13,11 @@ public class LineRasterizerBresenham extends ShapeRasterizer {
     private Point2D end;
 
     public LineRasterizerBresenham(Point2D start, Point2D end, Color primary, Color secondary, FillerType type) {
+
         this.start = start;
         this.end = end;
         primaryColor = primary.getRGB();
-        secondaryColor = secondary.getRed();
+        secondaryColor = secondary.getRGB();
         fillerType = type;
     }
     @Override

@@ -23,9 +23,10 @@ public class Filler {
         Color secondary, 
         float t
     ) {
+        
         switch (type) {
             case Solid:
-                return primary;
+                return new Color(primary.getRGB());
             case Inverted:
                 return new Color(0xffffff - raster.getPixel(p.x, p.y));
             case Transition:
@@ -36,15 +37,15 @@ public class Filler {
             case Dashed:
                 if (p.x % 15 < 8) {
                     if (p.y % 15 < 8)
-                        return primary;
+                        return new Color(primary.getRGB());
                     else
-                        return secondary;
+                        return new Color(secondary.getRGB());
                 }
                 else {
                     if (p.y % 15 < 8)
-                        return secondary;
-                else
-                    return primary;
+                        return new Color(secondary.getRGB());
+                    else
+                        return new Color(primary.getRGB());
                 }
             default:
                 throw new RuntimeException("unknown filler");
